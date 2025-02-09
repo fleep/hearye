@@ -56,3 +56,13 @@ version is automatically available for your container.
 
 HOWEVER, currently this rebuild will break the running application. After you rebuild,
 restart the API container and it will restart the app with the latest build.
+
+### Reinitializing the database
+The database initialization scripts will run exactly once upon deploying your DB container.
+
+The database has a persistent docker volume, and the database won't reinitailize as long as
+this volume exists.
+
+To reinitailize the database you must either:
+1. Run [bin/db-reinit](./bin/db-reinit) which will re-run all the sql init scripts automatically on the existing volume
+2. Or delete the `hearye_db` docker volume and redeploy the DB container
