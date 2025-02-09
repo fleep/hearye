@@ -1,0 +1,7 @@
+services:
+  hearye-api:
+    build: ./hearye-api
+    volumes:
+      - ./hearye-api/build/libs:/app    # mounts the local build dir
+    ports:
+      - "8000:8080"

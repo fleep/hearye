@@ -1,0 +1,46 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.4.2'
+    id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'org.fleep'
+version = '0.0.2-SNAPSHOT'
+
+sourceCompatibility = 21
+targetCompatibility = 21
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(23)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+// Automatically create a copy of the last build with a stable name, and copy it into a mount location
+task buildForDocker(type: Copy){
+    dependsOn bootJar
+    from bootJar
+    into 'build/libs/docker'
+    rename { String fileName ->
+        // a simple way is to remove the "-$version" from the jar filename
+        // but you can customize the filename replacement rule as you wish.
+        fileName.replace("-$project.version", "")
+    }
+}
+
+// Ensure that the jar copy is done after a build
+build.finalizedBy buildForDocker

@@ -1,0 +1,3 @@
+rootProject.name = 'hearye'
+include 'hearye-api'
+
