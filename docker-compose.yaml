@@ -1,7 +1,39 @@
 services:
   hearye-api:
+    container_name: api
     build: ./hearye-api
     volumes:
       - ./hearye-api/build/libs:/app    # mounts the local build dir
     ports:
       - "8000:8080"
+    networks:
+      - main
+
+  hearye-db:
+    # see: https://hub.docker.com/_/postgres for setup
+    container_name: db
+    image: postgres:14-alpine
+    ports:
+      - "5332:5432"
+    environment:
+      POSTGRES_DB: hearye
+      POSTGRES_USER: hearye
+      POSTGRES_PASSWORD: hearye
+      PGDATA: /var/lib/postgresql/data
+    volumes:
+      - db:/var/lib/postgresql/data
+      - ./hearye-db/db-init/:/docker-entrypoint-initdb.d/
+    networks:
+      - main
+    restart: unless-stopped
+    healthcheck:
+        test: [ "CMD-SHELL", "pg_isready -d postgres" ]
+        interval: 30s
+        timeout: 10s
+        retries: 5
+
+networks:
+  main:
+
+volumes:
+  db:
