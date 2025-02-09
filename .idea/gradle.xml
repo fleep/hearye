@@ -10,6 +10,7 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/hearye-api" />
+            <option value="$PROJECT_DIR$/hearye-db" />
           </set>
         </option>
       </GradleProjectSettings>
