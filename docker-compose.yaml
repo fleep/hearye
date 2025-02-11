@@ -1,11 +1,17 @@
 services:
   hearye-api:
     container_name: api
+    depends_on:
+      - hearye-db
+      - kafka
     build: ./hearye-api
     volumes:
-      - ./hearye-api/build/libs:/app    # mounts the local build dir
+      - ./hearye-api/build/libs/docker:/app    # mounts the local build dir
     ports:
       - "8000:8080"
+    environment:
+      BOOTSTRAP_SERVERS: kafka:9093
+      SPRING_PROFILES_ACTIVE: dev
     networks:
       - main
 
@@ -31,6 +37,36 @@ services:
         interval: 30s
         timeout: 10s
         retries: 5
+
+  kafka:
+    image: apache/kafka-native
+    ports:
+      - "9092:9092"
+    environment:
+      # Configure listeners for both docker and host communication.
+      # We have a DOCKER port of "kafka:9093" because "localhost" will not work for peer containers.
+      # So "kafka:9093" can be used for inter-container comms
+      KAFKA_LISTENERS: CONTROLLER://localhost:9091,HOST://0.0.0.0:9092,DOCKER://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: HOST://localhost:9092,DOCKER://kafka:9093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,DOCKER:PLAINTEXT,HOST:PLAINTEXT
+
+      # Settings required for KRaft mode
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@localhost:9091
+
+      # Listener to use for broker-to-broker communication
+      KAFKA_INTER_BROKER_LISTENER_NAME: DOCKER
+
+      # Required for a single node cluster
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+      # Topics. NOTE: we can also create these programmatically
+      KAFKA_CREATE_TOPICS: "notification-requested:3:3"
+    networks:
+      main:
+
 
 networks:
   main:

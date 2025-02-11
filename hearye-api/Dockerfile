@@ -7,4 +7,4 @@ WORKDIR /app
 # which helps with development.
 COPY ./build/libs/docker/hearye-api.jar hearye-api.jar
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "hearye-api.jar"]
+ENTRYPOINT ["java", "-jar", "/app/hearye-api.jar"]
