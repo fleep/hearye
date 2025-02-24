@@ -22,22 +22,9 @@ sequenceDiagram
         HearYe ->> LDAP: resolve group members
         HearYe ->> HearYe DB: append notifications
     end
-    loop Each notification
-        HearYe -->> Consumers: topic "enqueue-notification"
-        Consumers -->> HearYe: produce topic "dispatch-notification"
-    end
-    loop Each notification
-        HearYe -->> HearYe: produce topic "dispatch-notification"
-        HearYe -->> Mail Server: send email
-    end
     note over HearYe: 1:N expansion of requests to<br /> notifications per recipient
-    LDAP ->> HearYe: resolve group members
     note over HearYe: create base notifications
     HearYe ->> HearYe DB: append notifications
-    loop Each notification
-        HearYe -->> Consumers: topic "enqueue-notification"
-        Consumers -->> HearYe: produce topic "dispatch-notification"
-    end
     loop Each notification
         alt Modification mode?
             HearYe -->> Consumers: topic modify-notification
