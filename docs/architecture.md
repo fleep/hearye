@@ -10,34 +10,34 @@ sequenceDiagram
         participant Consumers as Client Consumer Group
     end
     participant HearYe
-    participant HearYe DB
+    participant DB as HearYe DB
     box gray Client Infrastructure
         participant LDAP as LDAP / AD
         participant Mail Server
     end
+    
     Clients -->> HearYe: POST /emailRequest - produce topic "enqueue-request"
-    HearYe -->> HearYe DB: insert request
+    HearYe ->> DB: insert request
+    note over HearYe: 1:N expansion of requests to<br /> notifications per recipient:
     loop Each recipient
-        HearYe -->> HearYe: produce topic "expand-request"
         HearYe ->> LDAP: resolve group members
-        HearYe ->> HearYe DB: append notifications
+        HearYe ->> DB: insert notification(s)
     end
-    note over HearYe: 1:N expansion of requests to<br /> notifications per recipient
-    note over HearYe: create base notifications
-    HearYe ->> HearYe DB: append notifications
+    
     loop Each notification
         alt Modification mode?
             HearYe -->> Consumers: topic modify-notification
             note over Consumers: message interpolation<br />modify recipients<br />etc.
             Consumers -->> HearYe: PATCH /email/<notificationId>
-            HearYe ->> HearYe DB: append updated notification
+            HearYe ->> DB: append updated notification
             Consumers -->> HearYe: produce topic dispatch-notification
         else
             HearYe -->> HearYe: produce topic dispatch-notification
         end
-        note over HearYe: append updated notification<br />inc dispatch attempt
+        HearYe ->> DB: append updated notification<br />inc dispatch attempt
         HearYe -->> Mail Server: send email
-        note over HearYe: append updated notification<br />>inc dispatch result
+        HearYe ->> DB: append updated notification<br />inc dispatch result
+        HearYe ->> DB: update request w/<Br /> completion details
     end
     
 ```
