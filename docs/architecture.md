@@ -42,7 +42,18 @@ sequenceDiagram
     
 ```
 
-### Summary
+### High Level Components
+#### HearYe Service Components
+- **HearYe**: The main service and web API. It handles scaling, retrying, and rate limiting of notifications being sent. It consists of multiple kafka consumer groups that can scale independently for different stages of the pipeline.
+- **HearYe DB**: The database that stores requests and notifications.
+
+#### Client Components
+- **Clients**: The client services using HearYe, likely through the HearYe Client Library. They enqueue notifications to be sent to one or more recipients.
+- **Client Consumer Group**: (optional) Part of the HearYe Client Library. Clients can listen to a topic to modify notifications before they are sent.
+- **LDAP / AD**: (optional) HearYe uses this to expand distribution list emails into individual recipients.
+- **Mail Server**: The email server that sends the emails.
+
+### Pipeline Summary
 - **Request notifications**: Clients enqueue notifications to be sent to one or more recipients
 - **Notification expansion**: HearYe expands the request into individual notifications, one per 
     recipient. It should support LDAP/AD group expansion to individual recipients.
@@ -63,4 +74,5 @@ sequenceDiagram
   - This allows allows HearYe to be agnostic of domain-specific issues and code, and effectively acts
     allows client code to modify the HearYe pipeline.
 - **Immediate mode**: for simpler use cases, clients can opt out of modification mode and send the email as formed in the original client request.
-- **Request dispatch**: HearYe handles scaling, retrying, and rate limiting of notifications being sent.
+- **Request dispatch**: HearYe handles scaling, retrying, and rate limiting of notifications being sent and integrates with client-configured 
+  messaging services (Email, chat apps, SMS, etc.),
