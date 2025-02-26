@@ -1,5 +1,7 @@
 rootProject.name = 'hearye'
+include 'hearye-common'
 include 'hearye-api'
 include 'hearye-db'
 include 'hearye-kafka'
+include 'hearye-client'
 

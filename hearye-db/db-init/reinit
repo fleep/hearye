@@ -1,7 +1,0 @@
-#!/bin/bash
-for file in /docker-entrypoint-initdb.d/*.sql; do
-  if [ -f "$file" ]; then
-    echo "Executing $file"
-    psql -U hearye hearye -f "$file"
-  fi
-done
